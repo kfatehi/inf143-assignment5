@@ -2,15 +2,22 @@ html {
   font-family: helvetica;
 }
 table {
+  margin-top: 150px;
   border-collapse: collapse;
   border: 2px black solid;
   font: 12px sans-serif;
+  page-break-after: always;
 }
 td {
   border: 1px black solid;
   padding: 5px;
 }
 .question {
+  margin: 20px;
+  clear: both;
+}
+.chart {
+  float: left;
   margin: 20px;
 }
 .chart text {
