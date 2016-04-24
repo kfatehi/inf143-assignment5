@@ -1,0 +1,22 @@
+html {
+  font-family: helvetica;
+}
+table {
+  border-collapse: collapse;
+  border: 2px black solid;
+  font: 12px sans-serif;
+}
+td {
+  border: 1px black solid;
+  padding: 5px;
+}
+.question {
+  margin: 20px;
+}
+.chart text {
+  font: 10px sans-serif;
+  text-anchor: end;
+}
+.explanation { 
+  'font-size': '1.2em'
+}

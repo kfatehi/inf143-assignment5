@@ -14,27 +14,56 @@ $(() => {
     // Render the questions, charts, and explanations
     let data = d3.csv.parse(csv)
     questions.forEach(function(q, i) {
-      let container = $('<div>').css({
-        'font-family': 'helvetica',
-        'margin': '20px',
-      }).append($('<h2>').text(q.question))
-      let chart = $('<div>')
-      container.append(chart)
-      q.render(chart.get(0), data)
-      chart.after($('<p>').text(q.explanation).css({
-        'font-size': '1.2em'
-      }))
+      let container = $('<div>').addClass("question")
+      .append($('<h2>').text(q.question))
+      let svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+      container.append($(svg).addClass('chart'))
+      q.render(svg, data)
+      container.append($('<p>').addClass('explanation').text(q.explanation))
       $('body').append(container);
     })
 
     // Render the source code
-    d3.text("src/index.js", function(code) {
-      let container = $('<div>').append($('<h3>').text("Source Code"))
-      container.append($('<pre>').text(code))
-      $('body').append(container)
+    let src = ['index.html', 'style.css', 'src/index.js']
+    src.forEach((path) => {
+      d3.text(path, function(code) {
+        let container = $('<div>').append($('<h3>').text(path))
+        container.append($('<pre>').text(code))
+        $('body').append(container)
+      })
     })
   });
 })
+
+// Define a reusable, generic barchart
+let barchart = (container, data) => {
+  let max = d3.max(data, d=>d.value)
+
+  let width = 420;
+  let barHeight = 20;
+  let x = d3.scale.linear().range([0, width]).domain([0, max])
+  let fill = d3.scale.linear().domain([0, max]).range(['#FF393E', '#74FF63'])
+
+  let chart = d3.select(container)
+  .attr('width', width)
+  .attr("height", barHeight * data.length);
+
+  let bar = chart.selectAll("g").data(data)
+  .enter().append("g")
+  .attr("transform", (d, i) => `translate(0,${ i * barHeight })`);
+
+  bar.append("rect")
+  .attr('fill', d => fill(d.value))
+  .attr('width', d => x(d.value))
+  .attr('height', barHeight - 1);
+
+  bar.append('text')
+  .attr('x', d => x(d.value) - 3)
+  .attr('y', barHeight / 2)
+  .attr('dy', '.35em')
+  .text(d => `${d.name} (${d.value})`)
+  
+}
   
 let questions = [{
   question: "1. Frequency/counting: How many students are in each major (in this class)?",
@@ -44,21 +73,7 @@ let questions = [{
     rawData.forEach(d => majors[d.Major] ?  majors[d.Major] ++ : majors[d.Major] = 1)
     Object.keys(majors).forEach(name => tempData.push({ value: majors[name], name: name }))
     let data = tempData.sort((a, b) => a.name.localeCompare(b.name))
-    let values = data.map(d => d.value)
-    let max = d3.max(values)
-    let scale = d3.scale.linear().domain([0, max])
-    let bgColor = d3.scale.linear().domain([0, max]).range(['#FF393E', '#74FF63'])
-    let txtColor = d3.scale.linear().domain([0, max]).range(['#023100', '#360000'])
-    d3.select(container)
-    .selectAll("div")
-    .data(data)
-    .enter().append("div")
-    .style("width", d => `${scale(d.value) * 100}%`)
-    .style("background-color", d => bgColor(d.value))
-    .style("color", d => txtColor(d.value))
-    .style("margin", '1px')
-    .style('padding', '5px')
-    .text(d => `${d.name} (${d.value})`);
+    barchart(container, data)
   },
   explanation: `
   This graphic allows the user to determine how many students are in each major.
@@ -77,21 +92,7 @@ let questions = [{
     let tempData = [];
     Object.keys(majors).forEach(name => tempData.push({ value: majors[name], name: name }))
     let data = tempData.sort((a, b) => a.name.localeCompare(b.name))
-    let values = data.map(d => d.value)
-    let max = d3.max(values)
-    let scale = d3.scale.linear().domain([0, max])
-    let bgColor = d3.scale.linear().domain([0, max]).range(['#FF393E', '#74FF63'])
-    let txtColor = d3.scale.linear().domain([0, max]).range(['#023100', '#360000'])
-    d3.select(container)
-    .selectAll("div")
-    .data(data)
-    .enter().append("div")
-    .style("width", d => `${scale(d.value) * 100}%`)
-    .style("background-color", d => bgColor(d.value))
-    .style("color", d => txtColor(d.value))
-    .style("margin", '1px')
-    .style('padding', '5px')
-    .text(d => `${d.name}`);
+    barchart(container, data)
   },
   explanation: `
   It is difficult to answer if major had an affect on score, however we can plot the data we have.
@@ -110,21 +111,7 @@ let questions = [{
     let tempData = [];
     Object.keys(standings).forEach(name => tempData.push({ value: standings[name], name: name }))
     let data = tempData.sort((a, b) => a.name.localeCompare(b.name))
-    let values = data.map(d => d.value)
-    let max = d3.max(values)
-    let scale = d3.scale.linear().domain([0, max])
-    let bgColor = d3.scale.linear().domain([0, max]).range(['#FF393E', '#74FF63'])
-    let txtColor = d3.scale.linear().domain([0, max]).range(['#023100', '#360000'])
-    d3.select(container)
-    .selectAll("div")
-    .data(data)
-    .enter().append("div")
-    .style("width", d => `${scale(d.value) * 100}%`)
-    .style("background-color", d => bgColor(d.value))
-    .style("color", d => txtColor(d.value))
-    .style("margin", '1px')
-    .style('padding', '5px')
-    .text(d => `${d.name}`);
+    barchart(container, data);
   },
   explanation: `
   The graphic uses the students' standing as a dimension with respect to the students' scores.
@@ -144,21 +131,7 @@ let questions = [{
     let tempData = [];
     Object.keys(req).forEach(name => tempData.push({ value: req[name], name: name }))
     let data = tempData.sort((a, b) => a.name.localeCompare(b.name))
-    let values = data.map(d => d.value)
-    let max = d3.max(values)
-    let scale = d3.scale.linear().domain([0, max])
-    let bgColor = d3.scale.linear().domain([0, max]).range(['#FF393E', '#74FF63'])
-    let txtColor = d3.scale.linear().domain([0, max]).range(['#023100', '#360000'])
-    d3.select(container)
-    .selectAll("div")
-    .data(data)
-    .enter().append("div")
-    .style("width", d => `${scale(d.value) * 100}%`)
-    .style("background-color", d => bgColor(d.value))
-    .style("color", d => txtColor(d.value))
-    .style("margin", '1px')
-    .style('padding', '5px')
-    .text(d => `${d.name}`);
+    barchart(container, data);
   },
   explanation: `
   This graphic answers whether or not the prerequisite had a significant effect on students' grades.
