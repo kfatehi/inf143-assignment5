@@ -1,8 +1,8 @@
 module.exports = {
-  entry: `${__dirname}/index.js`,
+  entry: `${__dirname}/src/index.js`,
   output: {
     path: './',
-    library: "test",
+    library: "bundle",
     filename: 'bundle.js'
   }
 }
