@@ -82,60 +82,73 @@ let questions = [{
   or less popular. By sorting in alphabetical order, the viewer can quickly scan to the major of interest.
   `,
 },{
-  question: "2. Did major have any affect on the score? Which majors scored higher/lower?",
+  question: "2. Did major have any effect on the score? Which majors scored higher/lower?",
   render: (container, rawData) => {
     let majors = {}
     rawData.forEach(d => {
       let grade = parseInt(d.Grade)
-      majors[d.Major] ? majors[d.Major] += grade : majors[d.Major] = grade
+      majors[d.Major] ? majors[d.Major].push(grade) : majors[d.Major] = [grade]
     })
     let tempData = [];
-    Object.keys(majors).forEach(name => tempData.push({ value: majors[name], name: name }))
+    Object.keys(majors).forEach(name => tempData.push({
+      name: name,
+      value: Math.round(d3.mean(majors[name])),
+    }))
     let data = tempData.sort((a, b) => a.name.localeCompare(b.name))
     barchart(container, data)
   },
   explanation: `
-  It is difficult to answer if major had an affect on score, however we can plot the data we have.
-  In this case, we can see that the Computer Science students had the highest scores while the
-  Medieval History, Gender Studies, and Art students had the lowest scores.
+  It is difficult to answer if major had an effect on score, however we can plot the data we have.
+  The students' scores are averaged within each major in order to help offset fewer students in one
+  major versus another. That score is used to make up the size and color of the bar.
   Color, bar size, and alphabetical ordering are used in order to improve seek time.
   `,
 },{
-  question: "3. Did standing have any affect on the score? Did sophomores or juniors do better?",
+  question: "3. Did standing have any effect on the score? Did sophomores or juniors do better?",
   render: (container, rawData) => {
     let standings = {}
     rawData.forEach(d => {
       let grade = parseInt(d.Grade)
-      standings[d.Standing] ? standings[d.Standing] += grade : standings[d.Standing] = grade
+      standings[d.Standing] ? standings[d.Standing].push(grade) : standings[d.Standing] = [grade]
     })
     let tempData = [];
-    Object.keys(standings).forEach(name => tempData.push({ value: standings[name], name: name }))
+    Object.keys(standings).forEach(name => tempData.push({
+      name: name,
+      value: Math.round(d3.mean(standings[name])),
+    }))
     let data = tempData.sort((a, b) => a.name.localeCompare(b.name))
     barchart(container, data);
   },
   explanation: `
-  The graphic uses the students' standing as a dimension with respect to the students' scores.
-  It allows the viewer to see which majors had the best scores. It does this using the bar size
-  as well as color. Sophomores, having the lowest combined score, has a small, red bar while the
-  top performing standings (Junior, Senior) have a large, green bar.
+  This graphic answers if student standing had any effect on the score by using the standing
+  as a dimension with respect to the students' scores, which are averaged.
+  It allows the viewer to see which standings have the best and worst scores, collectively.
+  The averaging helps compensate for underrepresentation of few students in a particular
+  standing. The color is also based on the average scores of the students. By showing all green
+  it indicates that there were no stand-out values in terms of standing score averages.
   `,
 },{
-  question: "4. Did having or lacking the prerequisite have an affect on the score?",
+  question: "4. Did having or lacking the prerequisite have an effect on the score?",
   render: (container, rawData) => {
-    let req = { "Prepared": 0, "Unprepared": 0 }
+    let req = { "Prepared": [], "Unprepared": [] }
     rawData.forEach(d => {
       let grade = parseInt(d.Grade)
       let hadReq = d['Prerequisites?'] === "Y" ? true : false;
-      hadReq ? req["Prepared"] += grade : req["Unprepared"] += grade
+      hadReq ? req["Prepared"].push(grade) : req["Unprepared"].push(grade)
     })
     let tempData = [];
-    Object.keys(req).forEach(name => tempData.push({ value: req[name], name: name }))
+    Object.keys(req).forEach(name => tempData.push({
+      value: Math.round(d3.mean(req[name])),
+      name: name
+    }))
     let data = tempData.sort((a, b) => a.name.localeCompare(b.name))
     barchart(container, data);
   },
   explanation: `
   This graphic answers whether or not the prerequisite had a significant effect on students' grades.
+  We average all the scores of each student and place them in one of two categories.
   The two bars have the same color and size indicating that there was not really a difference in the
-  students' grades based on having taken the prerequisite.
+  students' grades based on having taken the prerequisite or not.
+  That said, the data did not contradict the intuition that having taken the prerequisite helps.
   `,
 }]
