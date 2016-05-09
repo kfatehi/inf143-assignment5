@@ -2,7 +2,6 @@ html {
   font-family: helvetica;
 }
 table {
-  margin-top: 150px;
   border-collapse: collapse;
   border: 2px black solid;
   font: 12px sans-serif;
@@ -26,4 +25,12 @@ td {
 }
 .explanation { 
   'font-size': '1.2em'
+}
+.cell {
+  border: solid 1px white;
+  font: 10px sans-serif;
+  line-height: 12px;
+  overflow: hidden;
+  position: absolute;
+  text-indent: 2px;
 }
