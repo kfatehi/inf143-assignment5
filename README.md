@@ -1,19 +1,11 @@
-double the size of the table by adding your own fictitious data (24 in total)
+# Assignment #3
 
-questions
-1. Frequency/counting: How many students are in each major (in this class)?
-2. Did major have any affect on the score? Which majors scored higher/lower?
-3. Did standing have any affect on the score? Did sophomores or juniors do better?
-4. Did having or lacking the prerequisite have an affect on the score?
+1. Download the three ranking data sets from EEE: SE, HCI, CSCW. These data sets represent the productivity of individual faculty members in three areas of research (Software Engineering, Human-Computer Interaction, Computer Supported Cooperative Work) for a series of different universities. The higher the number, the more impactful that particular faculty member’s publications have been.
 
-for each question, explain in 1 to 3 sentences why the graphic is appropriate for answering that question. Also explain, using either the lectures or Ware, why your choice of colors is the best.
+2. You will create visualizations for each of these data sets. The purpose of your visualizations will be to show how UCI ranks in these three areas relative to other universities. Consider the audience to be academic administrators, who are concerned about the relative ranking of their faculty, and prospective students, who want to know how UCI is doing or whether they should attend UCI if they want to study one of these areas. One tricky issue is that there are different numbers of faculty in the various areas at the different universities. You will have to give some thought as to how to handle this in your visualizations.
 
-First, you should learn how to use D3 to do simple graphs. More challenging examples will come in later assignments. Second, you should learn to choose the best graphic for answering common questions. And third, you should learn to make wise selections of color for your graphs.
+3. Choose two different kinds of visualizations, then develop one of each kind for the three data sets (six visualizations total)
 
-Prepare a .pdf for submission that contains the following: the expanded data table with your additional students, the graphs and corresponding sentences for each of the questions above, and the D3 code you used for each graph. Submit your .pdf in the appropriate DropBox on EEE. It is due by class time on Tuesday, April 26.
+4. Explain the two kinds of visualizations you selected and why you selected them. Then, using principles from the text or lectures (with the source identified) explain which kind of visualization is superior for these data and why. Keep in mind the audiences for which these visualizations are intended.
 
-----
-
-## Resources
-
-https://bost.ocks.org/mike/bar/
+5. Paste all of your visualizations into a document (make sure they are labeled correctly) and put your text below. Also include your D3 code. Save as a .pdf file and submit the file to the Assignment 3 EEE dropbox.
