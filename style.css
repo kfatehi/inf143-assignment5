@@ -24,13 +24,15 @@ td {
   text-anchor: end;
 }
 .explanation { 
-  'font-size': '1.2em'
+  font-size: 1.2em;
+  page-break-after: always;
 }
-.cell {
-  border: solid 1px white;
+
+rect {
+  fill: none;
+  stroke: #fff;
+}
+
+text {
   font: 10px sans-serif;
-  line-height: 12px;
-  overflow: hidden;
-  position: absolute;
-  text-indent: 2px;
 }

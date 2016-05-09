@@ -55,7 +55,7 @@ $(() => {
 
 const prep = (rows) => {
   return [{
-    name: "All",
+    name: '',
     children: rows.map(row => {
       return {
         name: row[0],
@@ -99,7 +99,9 @@ let charts = [{
   },{
   title: df => `${df.title} Treemap`,
     render: function(container, data) {
-      treemap(h,w)(container[0], data)
+      let svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+      $(container).append($(svg));
+      treemap(h,w)(svg, data)
     },
     explanation: `
     <p>This visualization (treemap), similar to the sunburst, works
