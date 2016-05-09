@@ -4,7 +4,13 @@ import treemap from  './treemap';
 const $ = require('jquery');
 const d3 = require('d3');
 
-const sourceFiles = ['index.html', 'style.css', 'src/index.js']
+const sourceFiles = [
+  'index.html',
+  'style.css',
+  'src/sunburst.js',
+  'src/treemap.js',
+  'src/index.js',
+]
 const dataFiles = [{
   title: 'CSCW',
   path: 'data/cscw.csv',
@@ -41,7 +47,6 @@ $(() => {
       charts.forEach(function(chart, i) {
         let container = $('<div>')
           .append($('<h2>').text(chart.title(dataFile)))
-          .append('<div>')
         chart.render(container, prep(rows))
         container.append($('<p>').addClass('explanation').html(chart.explanation))
         $('body').append(container);
@@ -50,7 +55,7 @@ $(() => {
   });
 
   // Render the source files
-  // sourceFiles.forEach(path => d3.text(path, renderFile(path)));
+  sourceFiles.forEach(path => d3.text(path, renderFile(path)));
 })
 
 const prep = (rows) => {
@@ -72,8 +77,8 @@ const prep = (rows) => {
   }]
 }
 
-let h = 800;
-let w = 800;
+let h = 1000;
+let w = 1000;
 
 let charts = [{
   title: df => `${df.title} Sunburst`,

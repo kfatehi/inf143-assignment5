@@ -32,6 +32,7 @@ export default (h, w) => (container, data) => {
     .style("fill", d => color((d.children ? d : d.parent).name))
 
 
+  // source: http://stackoverflow.com/questions/22622381/how-to-position-text-labels-on-a-sunburst-chart-with-d3-js
   function getAngle(d) {
     // Offset the angle by 90 deg since the '0' degree axis for arc is Y axis, while
     // for text it is the X axis.
