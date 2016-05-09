@@ -29,13 +29,14 @@ const renderTable = (rows) => {
 }
 
 const renderFile = path => code => {
-  let container = $('<div>').append($('<h3>').text(path))
+  let container = $('<div>').addClass('break-after').append($('<h3>').text(path))
   container.append($('<pre>').text(code))
   $('body').append(container)
 }
 
 // Wait for document to load
 $(() => {
+
   dataFiles.forEach(function(dataFile) {
     d3.text(dataFile.path, function(csv) {
       var rows = d3.csv.parseRows(csv);
@@ -46,16 +47,22 @@ $(() => {
       // Render the charts and explanations
       charts.forEach(function(chart, i) {
         let container = $('<div>')
-          .append($('<h2>').text(chart.title(dataFile)))
+          .addClass('break-after')
+          .append($('<h2>').addClass('chart-title').text(chart.title(dataFile)))
         chart.render(container, prep(rows))
-        container.append($('<p>').addClass('explanation').html(chart.explanation))
         $('body').append(container);
       })
     });
   });
 
-  // Render the source files
-  sourceFiles.forEach(path => d3.text(path, renderFile(path)));
+  setTimeout(function() {
+    // Render remarks
+    $('body').append($('<div>').addClass('break-after').html(remarks()));
+
+    // Render the source files
+    sourceFiles.forEach(path => d3.text(path, renderFile(path)));
+  },1000)
+
 })
 
 const prep = (rows) => {
@@ -124,3 +131,23 @@ let charts = [{
     the same data and structure.</p>
     `,
 }]
+
+function remarks() {
+  return `
+  <p>I chose to create a treemap and a sunburst.</p>
+
+  ${charts.map(
+    c =>`<h3>${c.title({title:''})}</h3>${c.explanation}`
+  ).join('\n')}
+
+  <h3>Which is better?</h3>
+
+  <p>I believe the sunburst is a superior visualization for this dataset. There are two reasons why I think this:</p>
+
+  <ol>
+  <li>Viewer can look at one level (inner circle) and then look at the next level only if necessary whereas with a treemap you are given all data at once and it is not obvious to the eyes to separate one level from another. It takes more effort to "ignore" the extra data in a treemap than a sunburst, in my opinion.</li>
+
+  <li>The sunburst is easier to determine relative sizes of not only the schools but the individual faculty. The elements that are too small to matter are accurately represented as such with a smaller cross-section in one dimention. In contrast, the treemap takes up space in two dimensions for the same node, which only distracts the viewer when trying to make comparisons.</li>
+  </ol>
+  `
+}

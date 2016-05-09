@@ -9,11 +9,3 @@
 4. Explain the two kinds of visualizations you selected and why you selected them. Then, using principles from the text or lectures (with the source identified) explain which kind of visualization is superior for these data and why. Keep in mind the audiences for which these visualizations are intended.
 
 5. Paste all of your visualizations into a document (make sure they are labeled correctly) and put your text below. Also include your D3 code. Save as a .pdf file and submit the file to the Assignment 3 EEE dropbox.
-
-# TODO
-
-* label the sunburst
-  - lines into the center?
-* highlight UCI somehow in each viz
-
-

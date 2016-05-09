@@ -23,9 +23,13 @@ td {
   font: 10px sans-serif;
   text-anchor: end;
 }
-.explanation { 
-  font-size: 1.2em;
+
+.break-after {
   page-break-after: always;
+}
+
+p { 
+  font-size: 1.2em;
 }
 
 rect {
