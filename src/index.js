@@ -2,7 +2,16 @@ const $ = require('jquery');
 const d3 = require('d3');
 
 const sourceFiles = ['index.html', 'style.css', 'src/index.js']
-const dataFiles = ['data/cscw.csv', 'data/hci.csv', 'data/se.csv'];
+const dataFiles = [{
+  title: 'CSCW',
+  path: 'data/cscw.csv',
+},{
+  title: 'HCI',
+  path: 'data/hci.csv',
+},{
+  title: 'SE',
+  path: 'data/se.csv'
+}];
 
 const renderTable = (rows) => {
   d3.select("body").append("table")
@@ -18,22 +27,21 @@ const renderFile = path => code => {
 
 // Wait for document to load
 $(() => {
-  dataFiles.forEach(function(path) {
-    d3.text(path, function(csv) {
+  dataFiles.forEach(function(dataFile) {
+    d3.text(dataFile.path, function(csv) {
       var rows = d3.csv.parseRows(csv);
 
       // Render the data table
       // renderTable(rows);
 
       // Render the charts and explanations
-      let data = d3.csv.parse(csv)
-      questions.forEach(function(q, i) {
-        let container = $('<div>').addClass("question")
-          .append($('<h2>').text(q.question))
+      charts.forEach(function(chart, i) {
+        let container = $('<div>').addClass("chart")
+          .append($('<h2>').text(dataFile.title+' -- '+chart.title))
         let svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
         container.append($(svg).addClass('chart'))
-        q.render(svg, data)
-        container.append($('<p>').addClass('explanation').text(q.explanation))
+        chart.render(svg, prep(rows))
+        container.append($('<p>').addClass('explanation').text(chart.explanation))
         $('body').append(container);
       })
     });
@@ -43,12 +51,25 @@ $(() => {
   // sourceFiles.forEach(path => d3.text(path, renderFile(path)));
 })
 
+const prep = (rows) => {
+  return rows.map(row => {
+    const school = row[0];
+    const contribs = row.slice(1, row.length-1)
+      .filter(i => i.length > 0)
+      .map(i=>+i);
+    return { school, contribs }
+  });
+}
+
 let charts = [{
-  render: (container, rawData) => {
+  title: 'chart 1',
+  render: (container, data) => {
+    console.log(data);
   },
   explanation: ``,
 },{
-  render: (container, rawData) => {
+  title: 'chart 2',
+  render: (container, data) => {
   },
   explanation: ``,
 }]
