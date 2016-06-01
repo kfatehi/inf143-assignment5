@@ -1,8 +1,6 @@
-import sunburst from  './sunburst';
-import treemap from  './treemap';
-
 const $ = require('jquery');
 const d3 = require('d3');
+import linechart from './linechart';
 
 const sourceFiles = [
   'index.html',
@@ -12,14 +10,11 @@ const sourceFiles = [
   'src/index.js',
 ]
 const dataFiles = [{
-  title: 'CSCW',
-  path: 'data/cscw.csv',
+  title: 'Red Wine',
+  path: 'data/winequality-red.csv',
 },{
-  title: 'HCI',
-  path: 'data/hci.csv',
-},{
-  title: 'SE',
-  path: 'data/se.csv'
+  title: 'White Wine',
+  path: 'data/winequality-white.csv',
 }];
 
 const renderTable = (rows) => {
@@ -36,28 +31,32 @@ const renderFile = path => code => {
 
 // Wait for document to load
 $(() => {
-
+  let container = $('<div>').addClass('chart-container');
   dataFiles.forEach(function(dataFile) {
     d3.text(dataFile.path, function(csv) {
-      var rows = d3.csv.parseRows(csv);
+      let dsv = d3.dsv(';', 'text/plain');
+      let rows = dsv.parseRows(csv);
+      let dataRows = rows.slice(1, rows.length);
+      let cols = rows[0];
+      let outputIdx = cols.length-1;
+      $('body').append(cols.slice(1, cols.length-1).map(function(name, idx) {
+        return $('<button>').text(name).click(function() {
 
-      // Render the data table
-      // renderTable(rows);
+          let data = dataRows.map(row => [row[idx], row[outputIdx]]);
 
-      // Render the charts and explanations
-      charts.forEach(function(chart, i) {
-        let container = $('<div>')
-          .addClass('break-after')
-          .append($('<h2>').addClass('chart-title').text(chart.title(dataFile)))
-        chart.render(container, prep(rows))
-        $('body').append(container);
-      })
+          let svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+          container.empty();
+          container.append(svg);
+          linechart(svg, data);
+        });
+      }));
+      $('body').append(container);
     });
   });
 
   setTimeout(function() {
     // Render remarks
-    $('body').append($('<div>').addClass('break-after').html(remarks()));
+    $('body').append($('<div>').html(remarks()));
 
     // Render the source files
     sourceFiles.forEach(path => d3.text(path, renderFile(path)));
@@ -134,20 +133,6 @@ let charts = [{
 
 function remarks() {
   return `
-  <p>I chose to create a treemap and a sunburst.</p>
-
-  ${charts.map(
-    c =>`<h3>${c.title({title:''})}</h3>${c.explanation}`
-  ).join('\n')}
-
-  <h3>Which is better?</h3>
-
-  <p>I believe the sunburst is a superior visualization for this dataset. There are two reasons why I think this:</p>
-
-  <ol>
-  <li>Viewer can look at one level (inner circle) and then look at the next level only if necessary whereas with a treemap you are given all data at once and it is not obvious to the eyes to separate one level from another. It takes more effort to "ignore" the extra data in a treemap than a sunburst, in my opinion.</li>
-
-  <li>The sunburst is easier to determine relative sizes of not only the schools but the individual faculty. The elements that are too small to matter are accurately represented as such with a smaller cross-section in one dimention. In contrast, the treemap takes up space in two dimensions for the same node, which only distracts the viewer when trying to make comparisons.</li>
-  </ol>
+  <p>I chose to create a *name of vis* and this is the *brief explanation*.</p>
   `
 }

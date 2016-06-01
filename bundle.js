@@ -47,159 +47,233 @@ var bundle =
 
 	'use strict';
 
-	var $ = __webpack_require__(1);
-	var d3 = __webpack_require__(2);
+	var _sunburst = __webpack_require__(1);
+
+	var _sunburst2 = _interopRequireDefault(_sunburst);
+
+	var _treemap = __webpack_require__(2);
+
+	var _treemap2 = _interopRequireDefault(_treemap);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var $ = __webpack_require__(3);
+	var d3 = __webpack_require__(4);
+
+	var sourceFiles = ['index.html', 'style.css', 'src/sunburst.js', 'src/treemap.js', 'src/index.js'];
+	var dataFiles = [{
+	  title: 'CSCW',
+	  path: 'data/cscw.csv'
+	}, {
+	  title: 'HCI',
+	  path: 'data/hci.csv'
+	}, {
+	  title: 'SE',
+	  path: 'data/se.csv'
+	}];
+
+	var renderTable = function renderTable(rows) {
+	  d3.select("body").append("table").selectAll("tr").data(rows).enter().append("tr").selectAll("td").data(function (d) {
+	    return d;
+	  }).enter().append("td").text(function (d) {
+	    return d;
+	  });
+	};
+
+	var renderFile = function renderFile(path) {
+	  return function (code) {
+	    var container = $('<div>').addClass('break-after').append($('<h3>').text(path));
+	    container.append($('<pre>').text(code));
+	    $('body').append(container);
+	  };
+	};
 
 	// Wait for document to load
 	$(function () {
-	  // Fetch the data
-	  d3.text("data.csv", function (csv) {
-	    // Render the data table
-	    var rows = d3.csv.parseRows(csv);
-	    d3.select("body").append("table").selectAll("tr").data(rows).enter().append("tr").selectAll("td").data(function (d) {
-	      return d;
-	    }).enter().append("td").text(function (d) {
-	      return d;
-	    });
 
-	    // Render the questions, charts, and explanations
-	    var data = d3.csv.parse(csv);
-	    questions.forEach(function (q, i) {
-	      var container = $('<div>').addClass("question").append($('<h2>').text(q.question));
-	      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-	      container.append($(svg).addClass('chart'));
-	      q.render(svg, data);
-	      container.append($('<p>').addClass('explanation').text(q.explanation));
-	      $('body').append(container);
-	    });
+	  dataFiles.forEach(function (dataFile) {
+	    d3.text(dataFile.path, function (csv) {
+	      var rows = d3.csv.parseRows(csv);
 
-	    // Render the source code
-	    var src = ['index.html', 'style.css', 'src/index.js'];
-	    src.forEach(function (path) {
-	      d3.text(path, function (code) {
-	        var container = $('<div>').append($('<h3>').text(path));
-	        container.append($('<pre>').text(code));
+	      // Render the data table
+	      // renderTable(rows);
+
+	      // Render the charts and explanations
+	      charts.forEach(function (chart, i) {
+	        var container = $('<div>').addClass('break-after').append($('<h2>').addClass('chart-title').text(chart.title(dataFile)));
+	        chart.render(container, prep(rows));
 	        $('body').append(container);
 	      });
 	    });
 	  });
+
+	  setTimeout(function () {
+	    // Render remarks
+	    $('body').append($('<div>').addClass('break-after').html(remarks()));
+
+	    // Render the source files
+	    sourceFiles.forEach(function (path) {
+	      return d3.text(path, renderFile(path));
+	    });
+	  }, 1000);
 	});
 
-	// Define a reusable, generic barchart
-	var barchart = function barchart(container, data) {
-	  var max = d3.max(data, function (d) {
-	    return d.value;
-	  });
-
-	  var width = 420;
-	  var barHeight = 20;
-	  var x = d3.scale.linear().range([0, width]).domain([0, max]);
-	  var fill = d3.scale.linear().domain([0, max]).range(['#FF393E', '#74FF63']);
-
-	  var chart = d3.select(container).attr('width', width).attr("height", barHeight * data.length);
-
-	  var bar = chart.selectAll("g").data(data).enter().append("g").attr("transform", function (d, i) {
-	    return 'translate(0,' + i * barHeight + ')';
-	  });
-
-	  bar.append("rect").attr('fill', function (d) {
-	    return fill(d.value);
-	  }).attr('width', function (d) {
-	    return x(d.value);
-	  }).attr('height', barHeight - 1);
-
-	  bar.append('text').attr('x', function (d) {
-	    return x(d.value) - 3;
-	  }).attr('y', barHeight / 2).attr('dy', '.35em').text(function (d) {
-	    return d.name + ' (' + d.value + ')';
-	  });
+	var prep = function prep(rows) {
+	  return [{
+	    name: '',
+	    children: rows.map(function (row) {
+	      return {
+	        name: row[0],
+	        children: row.slice(1, row.length - 1).filter(function (i) {
+	          return i.length > 0;
+	        }).map(function (i) {
+	          return {
+	            name: 'Anonymous Faculty',
+	            size: +i
+	          };
+	        })
+	      };
+	    })
+	  }];
 	};
 
-	var questions = [{
-	  question: "1. Frequency/counting: How many students are in each major (in this class)?",
-	  render: function render(container, rawData) {
-	    var majors = {};
-	    var tempData = [];
-	    rawData.forEach(function (d) {
-	      return majors[d.Major] ? majors[d.Major]++ : majors[d.Major] = 1;
-	    });
-	    Object.keys(majors).forEach(function (name) {
-	      return tempData.push({ value: majors[name], name: name });
-	    });
-	    var data = tempData.sort(function (a, b) {
-	      return a.name.localeCompare(b.name);
-	    });
-	    barchart(container, data);
+	var h = 1000;
+	var w = 1000;
+
+	var charts = [{
+	  title: function title(df) {
+	    return df.title + ' Sunburst';
 	  },
-	  explanation: '\n  This graphic allows the user to determine how many students are in each major.\n  It does this by clearly labelling the number of students and the major within each bar.\n  By using color and bar size it allows the viewer to determine, at a glance, which majors are more\n  or less popular. By sorting in alphabetical order, the viewer can quickly scan to the major of interest.\n  '
+	  render: function render(container, data) {
+	    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	    $(container).append($(svg));
+	    (0, _sunburst2.default)(h, w)(svg, data);
+	  },
+	  explanation: '\n  <p>This visualization (sunburst) allows the viewer to quickly pick out\n  which schools are the most high impact relative to each other as\n  well as pick out which faculty are highest impact relative to each\n  other. Color is used to distinguish one school from another. The\n  same color is used for each faculty member of a school in order\n  to make it easy to keep in mind which school\'s faculty is being\n  viewed.</p>\n\n  <p>I chose this visualization because I feel that the data is in\n  fact heirarchical in nature and given that the viewer wants to\n  view the whole as well as the sum of its parts \n  (the school as the faculty members), the sunburst was appropriate.</p>\n  '
 	}, {
-	  question: "2. Did major have any effect on the score? Which majors scored higher/lower?",
-	  render: function render(container, rawData) {
-	    var majors = {};
-	    rawData.forEach(function (d) {
-	      var grade = parseInt(d.Grade);
-	      majors[d.Major] ? majors[d.Major].push(grade) : majors[d.Major] = [grade];
-	    });
-	    var tempData = [];
-	    Object.keys(majors).forEach(function (name) {
-	      return tempData.push({
-	        name: name,
-	        value: Math.round(d3.mean(majors[name]))
-	      });
-	    });
-	    var data = tempData.sort(function (a, b) {
-	      return a.name.localeCompare(b.name);
-	    });
-	    barchart(container, data);
+	  title: function title(df) {
+	    return df.title + ' Treemap';
 	  },
-	  explanation: '\n  It is difficult to answer if major had an effect on score, however we can plot the data we have.\n  The students\' scores are averaged within each major in order to help offset fewer students in one\n  major versus another. That score is used to make up the size and color of the bar.\n  Color, bar size, and alphabetical ordering are used in order to improve seek time.\n  '
-	}, {
-	  question: "3. Did standing have any effect on the score? Did sophomores or juniors do better?",
-	  render: function render(container, rawData) {
-	    var standings = {};
-	    rawData.forEach(function (d) {
-	      var grade = parseInt(d.Grade);
-	      standings[d.Standing] ? standings[d.Standing].push(grade) : standings[d.Standing] = [grade];
-	    });
-	    var tempData = [];
-	    Object.keys(standings).forEach(function (name) {
-	      return tempData.push({
-	        name: name,
-	        value: Math.round(d3.mean(standings[name]))
-	      });
-	    });
-	    var data = tempData.sort(function (a, b) {
-	      return a.name.localeCompare(b.name);
-	    });
-	    barchart(container, data);
+	  render: function render(container, data) {
+	    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	    $(container).append($(svg));
+	    (0, _treemap2.default)(h, w)(svg, data);
 	  },
-	  explanation: '\n  This graphic answers if student standing had any effect on the score by using the standing\n  as a dimension with respect to the students\' scores, which are averaged.\n  It allows the viewer to see which standings have the best and worst scores, collectively.\n  The averaging helps compensate for underrepresentation of few students in a particular\n  standing. The color is also based on the average scores of the students. By showing all green\n  it indicates that there were no stand-out values in terms of standing score averages.\n  '
-	}, {
-	  question: "4. Did having or lacking the prerequisite have an effect on the score?",
-	  render: function render(container, rawData) {
-	    var req = { "Prepared": [], "Unprepared": [] };
-	    rawData.forEach(function (d) {
-	      var grade = parseInt(d.Grade);
-	      var hadReq = d['Prerequisites?'] === "Y" ? true : false;
-	      hadReq ? req["Prepared"].push(grade) : req["Unprepared"].push(grade);
-	    });
-	    var tempData = [];
-	    Object.keys(req).forEach(function (name) {
-	      return tempData.push({
-	        value: Math.round(d3.mean(req[name])),
-	        name: name
-	      });
-	    });
-	    var data = tempData.sort(function (a, b) {
-	      return a.name.localeCompare(b.name);
-	    });
-	    barchart(container, data);
-	  },
-	  explanation: '\n  This graphic answers whether or not the prerequisite had a significant effect on students\' grades.\n  We average all the scores of each student and place them in one of two categories.\n  The two bars have the same color and size indicating that there was not really a difference in the\n  students\' grades based on having taken the prerequisite or not.\n  That said, the data did not contradict the intuition that having taken the prerequisite helps.\n  '
+	  explanation: '\n    <p>This visualization (treemap), similar to the sunburst, works\n    well with this type of nested data. The choice of colors are\n    also simply for separating out the schools, which make up the\n    main blocks (first level) of the tree map. The faculty members\n    make up the second level, with their size a function of their\n    individual impact. Naturally, the size of the parent (the school)\n    is a function of all the individual impacts of the faculty.</p>\n\n      <p>I chose this visualization because it was another way to view\n    heirarchical data. In the treemap we can still view the whole\n    as well as the sum of its parts. I was also curious how different\n    the treemap and the sunburst would be in reprenting exactly\n    the same data and structure.</p>\n    '
 	}];
+
+	function remarks() {
+	  return '\n  <p>I chose to create a treemap and a sunburst.</p>\n\n  ' + charts.map(function (c) {
+	    return '<h3>' + c.title({ title: '' }) + '</h3>' + c.explanation;
+	  }).join('\n') + '\n\n  <h3>Which is better?</h3>\n\n  <p>I believe the sunburst is a superior visualization for this dataset. There are two reasons why I think this:</p>\n\n  <ol>\n  <li>Viewer can look at one level (inner circle) and then look at the next level only if necessary whereas with a treemap you are given all data at once and it is not obvious to the eyes to separate one level from another. It takes more effort to "ignore" the extra data in a treemap than a sunburst, in my opinion.</li>\n\n  <li>The sunburst is easier to determine relative sizes of not only the schools but the individual faculty. The elements that are too small to matter are accurately represented as such with a smaller cross-section in one dimention. In contrast, the treemap takes up space in two dimensions for the same node, which only distracts the viewer when trying to make comparisons.</li>\n  </ol>\n  ';
+	}
 
 /***/ },
 /* 1 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	exports.default = function (h, w) {
+	  return function (container, data) {
+	    var r = Math.min(w, h) / 2,
+	        color = d3.scale.category20b();
+
+	    var vis = d3.select(container).attr("width", w).attr("height", h).append("svg:g").attr("transform", "translate(" + w / 2 + "," + h / 2 + ")");
+
+	    var partition = d3.layout.partition().sort(null).size([2 * Math.PI, r * r]).value(function (d) {
+	      return d.size;
+	    });
+
+	    var arc = d3.svg.arc().startAngle(function (d) {
+	      return d.x;
+	    }).endAngle(function (d) {
+	      return d.x + d.dx;
+	    }).innerRadius(function (d) {
+	      return Math.sqrt(d.y);
+	    }).outerRadius(function (d) {
+	      return Math.sqrt(d.y + d.dy);
+	    });
+
+	    var arcs = vis.data(data).selectAll("path").data(partition.nodes).enter();
+
+	    arcs.append("svg:path").attr("display", function (d) {
+	      return d.depth ? null : "none";
+	    }) // hide inner ring
+	    .attr("d", arc).attr("fill-rule", "evenodd").style("stroke", "#fff").style("fill", function (d) {
+	      return color((d.children ? d : d.parent).name);
+	    });
+
+	    // source: http://stackoverflow.com/questions/22622381/how-to-position-text-labels-on-a-sunburst-chart-with-d3-js
+	    function getAngle(d) {
+	      // Offset the angle by 90 deg since the '0' degree axis for arc is Y axis, while
+	      // for text it is the X axis.
+	      var thetaDeg = 180 / Math.PI * (arc.startAngle()(d) + arc.endAngle()(d)) / 2 - 90;
+	      // If we are rotating the text by more than 90 deg, then "flip" it.
+	      // This is why "text-anchor", "middle" is important, otherwise, this "flip" would
+	      // a little harder.
+	      return thetaDeg > 90 ? thetaDeg - 180 : thetaDeg;
+	    }
+
+	    // Labels
+	    arcs.append('text').attr("transform", function (d) {
+	      return "translate(" + arc.centroid(d) + "),rotate(" + getAngle(d) + ")";
+	    }).attr("text-anchor", "middle").text(function (d) {
+	      return d.children ? d.name : d.size;
+	    });
+	  };
+	};
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	exports.default = function (h, w) {
+	  return function (container, data) {
+	    var width = 960,
+	        height = 500,
+	        color = d3.scale.category20c();
+
+	    var treemap = d3.layout.treemap().padding([20, 4, 4, 4]).size([width, height]).value(function (d) {
+	      return d.size;
+	    });
+
+	    var svg = d3.select(container).attr("width", width).attr("height", height).append("svg:g").attr("transform", "translate(-.5,-.5)");
+
+	    var cell = svg.data(data).selectAll("g").data(treemap.nodes).enter().append("g").attr("transform", function (d) {
+	      return "translate(" + d.x + "," + d.y + ")";
+	    });
+
+	    cell.append("rect").attr("width", function (d) {
+	      return d.dx;
+	    }).attr("height", function (d) {
+	      return d.dy;
+	    }).style("fill", function (d) {
+	      return d.children ? color(d.name) : null;
+	    });
+
+	    cell.append("text").attr("x", function (d) {
+	      return d.dx / 2;
+	    }).attr("y", function (d) {
+	      return d.children ? 10 : d.dy / 2;
+	    }).attr("dy", ".35em").attr("text-anchor", "middle").text(function (d) {
+	      return d.children ? d.name : d.size;
+	    });
+	  };
+	};
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10047,7 +10121,7 @@ var bundle =
 
 
 /***/ },
-/* 2 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;!function() {
