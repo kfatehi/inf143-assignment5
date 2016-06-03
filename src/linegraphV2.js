@@ -5,25 +5,27 @@ export default (container, data) => {
     .entries(data);
   console.log(JSON.stringify(dataGroup));
   var color = d3.scale.category10();
-
-  var vis = d3.select(container).append('svg');
-  var WIDTH = 1000;
-  var HEIGHT = 1000;
-  var MARGINS = {
+  var WIDTH = 1000,
+      HEIGHT = 500,
+      MARGINS = {
         top: 50,
         right: 20,
         bottom: 50,
         left: 50
       };
 
-  var lSpace = WIDTH/dataGroup.length;
-  var xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {
+  var vis = d3.select(container).append('svg')
+    .attr("width", WIDTH)
+    .attr("height", HEIGHT);
+
+
+      var lSpace = WIDTH/dataGroup.length,
+  xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(data, function(d) {
     return d.metric;
   }), d3.max(data, function(d) {
     return d.metric;
-  })]);
-  
-  var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([d3.min(data, function(d) {
+  })]),
+         yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([d3.min(data, function(d) {
            return d.quality;
          }), d3.max(data, function(d) {
            return d.quality;
