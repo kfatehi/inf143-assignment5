@@ -1,6 +1,7 @@
 const $ = require('jquery');
 const d3 = require('d3');
-import plot from './scatterplot';
+//import plot from './scatterplot';
+import plot from './linegraphV2';
 
 const sourceFiles = [
   'src/index.js',
@@ -36,6 +37,8 @@ $(() => {
       let dataRows = rows.slice(1, rows.length);
       let cols = rows[0];
       let outputIdx = cols.length-1;
+      console.log(cols);
+      console.log(cols.slice(1, cols.length-1));
       $('body').append(cols.slice(1, cols.length-1).map(function(name, idx) {
         return $('<button>').text(name).click(function() {
 
