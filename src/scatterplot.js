@@ -1,4 +1,4 @@
-export default (container, data) => {
+export default (container, data, name, {colorMap}) => {
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
@@ -15,8 +15,10 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
     yAxis = d3.svg.axis().scale(yScale).orient("left");
 
   // setup fill color
-  var cValue = function(d) { return d.Manufacturer;},
-    color = d3.scale.category10();
+  var cValue = function(d) { return d.type;},
+    color = function(type) {
+      return colorMap[type]
+    }
 
   // add the graph canvas to the body of the webpage
   var svg = d3.select(container).append('svg')
@@ -25,9 +27,6 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // add the tooltip area to the webpage
-
-
   // change string (from CSV) into number format
     data.forEach(function(d) {
       d.metric = +d.metric;
@@ -35,8 +34,8 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
     });
 
     // don't want dots overlapping axis, so add in buffer to data domain
-    xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-    yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+    xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
+    yScale.domain([d3.min(data, yValue)-0.5, d3.max(data, yValue)+0.5]);
 
     // x-axis
     svg.append("g")
@@ -48,7 +47,7 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
       .attr("x", width)
       .attr("y", -6)
       .style("text-anchor", "end")
-      .text("Metric");
+      .text(name);
 
     // y-axis
     svg.append("g")
@@ -67,24 +66,14 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
         .data(data)
         .enter().append("circle")
         .attr("class", "dot")
-        .attr("r", 3.5)
+        .attr("r", 3)
         .attr("cx", xMap)
         .attr("cy", yMap)
         .style("fill", function(d) { return color(cValue(d));}) 
-        .on("mouseover", function(d) {
-          tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-        })
-        .on("mouseout", function(d) {
-          tooltip.transition()
-              .duration(500)
-              .style("opacity", 0);
-          });
 
         // draw legend
         var legend = svg.selectAll(".legend")
-          .data(color.domain())
+          .data(Object.keys(colorMap))
           .enter().append("g")
           .attr("class", "legend")
           .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
@@ -94,7 +83,9 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
             .attr("x", width - 18)
             .attr("width", 18)
             .attr("height", 18)
-            .style("fill", color);
+            .style("fill", function(d) {
+              return colorMap[d]
+            });
 
           // draw legend text
             legend.append("text")

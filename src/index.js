@@ -1,7 +1,7 @@
 const $ = require('jquery');
 const d3 = require('d3');
-//import plot from './scatterplot';
-import plot from './linegraphV2';
+import plot from './scatterplot';
+//import plot from './linegraphV2';
 
 const sourceFiles = [
   'src/index.js',
@@ -53,8 +53,8 @@ $(() => {
         let whiteData = whiteDataRows.map(row => {
           return {
             type: 'White',
-            quality: row[outputIdx],
-            metric: row[idx], 
+            quality: +row[outputIdx],
+            metric: +row[idx], 
           }
         }).sort(function(a,b) {
           return a.metric - b.metric;
@@ -62,15 +62,12 @@ $(() => {
 
         let data = redData.concat(whiteData);
 
-
-
-
         return $('<button>').text(name).click(function() {
           container.empty();
           plot(container.get(0), data, name, {
             colorMap: {
               "Red": `rgba(${230},${16},${69}, 0.8)`,
-              "White": `rgba(${230},${222},${16}, 0.9)`,
+              "White": `rgba(${230},${222},${16}, 0.4)`,
             }
           });
         });
