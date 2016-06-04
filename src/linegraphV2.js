@@ -1,9 +1,8 @@
-export default (container, data) => {
+export default (container, data, qualityName, {colorMap}) => {
 
   var dataGroup = d3.nest()
-    .key(function(d) {return "wine shit";})
+    .key(function(d) {return d.type;})
     .entries(data);
-  console.log(JSON.stringify(dataGroup));
   var color = d3.scale.category10();
   var WIDTH = 1000,
       HEIGHT = 500,
@@ -56,10 +55,8 @@ export default (container, data) => {
   dataGroup.forEach(function(d,i) {
     vis.append('svg:path')
     .attr('d', lineGen(d.values))
-    .attr('stroke', function(d,j) { 
-      return "hsl(" + Math.random() * 360 + ",100%,50%)";
-    })
-  .attr('stroke-width', 2)
+    .attr('stroke', colorMap[d.key])
+    .attr('stroke-width', 2)
     .attr('id', 'line_'+d.key)
     .attr('fill', 'none');
   vis.append("text")
@@ -73,7 +70,7 @@ export default (container, data) => {
       d3.select("#line_" + d.key).style("opacity", opacity);
       d.active = active;
     })
-  .text(d.key);
+  .text(qualityName);
   });
 
 }

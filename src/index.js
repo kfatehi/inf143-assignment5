@@ -7,13 +7,6 @@ const sourceFiles = [
   'src/index.js',
   'src/scatterplot.js',
 ]
-const dataFiles = [{
-  title: 'Red Wine',
-  path: 'data/winequality-red.csv',
-},{
-  title: 'White Wine',
-  path: 'data/winequality-white.csv',
-}];
 
 const renderTable = (rows) => {
   d3.select("body").append("table")
@@ -30,34 +23,63 @@ const renderFile = path => code => {
 // Wait for document to load
 $(() => {
   let container = $('<div>').addClass('chart-container');
-  dataFiles.forEach(function(dataFile) {
-    d3.text(dataFile.path, function(csv) {
-      let dsv = d3.dsv(';', 'text/plain');
-      let rows = dsv.parseRows(csv);
-      let dataRows = rows.slice(1, rows.length);
-      let cols = rows[0];
-      let outputIdx = cols.length-1;
-      console.log(cols);
-      console.log(cols.slice(1, cols.length-1));
-      $('body').append(cols.slice(1, cols.length-1).map(function(name, idx) {
+
+  let dsv = d3.dsv(';', 'text/plain');
+  d3.text('data/winequality-red.csv', function(redsCsv) {
+    let AllRedRows = dsv.parseRows(redsCsv);
+    let redDataRows = AllRedRows.slice(1, AllRedRows.length);
+
+    let colNames = AllRedRows[0]; // same for both
+    let outputIdx = colNames.length-1;
+
+    d3.text('data/winequality-white.csv', function(whitesCsv) {
+      let AllWhiteRows = dsv.parseRows(whitesCsv);
+      let whiteDataRows = AllWhiteRows.slice(1, AllRedRows.length);
+
+
+      $('body').append(colNames.slice(1, colNames.length-1).map(function(name, idx) {
+
+
+        let redData = redDataRows.map(row => {
+          return {
+            type: 'Red',
+            quality: row[outputIdx],
+            metric: row[idx], 
+          }
+        }).sort(function(a,b) {
+          return a.metric - b.metric;
+        });
+
+        let whiteData = whiteDataRows.map(row => {
+          return {
+            type: 'White',
+            quality: row[outputIdx],
+            metric: row[idx], 
+          }
+        }).sort(function(a,b) {
+          return a.metric - b.metric;
+        });
+
+        let data = redData.concat(whiteData);
+
+
+
+
         return $('<button>').text(name).click(function() {
-
-          let data = dataRows.map(row => {
-            return {
-              quality: row[outputIdx],
-              metric: row[idx], 
-            }
-          }).sort(function(a,b) {
-            return a.metric - b.metric;
-          });
-
           container.empty();
-          plot(container.get(0), data);
+          plot(container.get(0), data, name, {
+            colorMap: {
+              "Red": `rgba(${230},${16},${69}, 0.8)`,
+              "White": `rgba(${230},${222},${16}, 0.9)`,
+            }
+          });
         });
       }));
       $('body').append(container);
-    });
-  });
+
+    })
+  })
+
 
   setTimeout(function() {
     function remarks() {
