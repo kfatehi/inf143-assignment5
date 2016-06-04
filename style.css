@@ -40,3 +40,9 @@ rect {
 text {
   font: 10px sans-serif;
 }
+
+
+button {
+  width: 100px;
+  height: 50px;
+}
